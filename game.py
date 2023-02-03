@@ -5,23 +5,21 @@ SKY_COLOR = 6
 PLAYER_COLOR = 8
 FLOOR_COLOR = 4
 
+
 class App:
     def __init__(self):
         pyxel.init(400, 300, title="Platformer", quit_key=pyxel.KEY_Q)
         self.floors = [
-            BoxWithCollision(
-                0, pyxel.height - 20, pyxel.width, 20, FLOOR_COLOR, filled=True
-            ),
-            BoxWithCollision(50, pyxel.height - 100, 40, 20, FLOOR_COLOR, filled=True),
+            Box(0, pyxel.height - 20, pyxel.width, 20, FLOOR_COLOR, filled=True),
+            Box(50, pyxel.height - 100, 40, 20, FLOOR_COLOR, filled=True),
         ]
-        self.player = BoxWithCollision(
+        self.player = Player(
             20,
             20,
             20,
             20,
             PLAYER_COLOR,
             filled=True,
-            phys=True,
             keys_move_x_pos=[pyxel.KEY_D, pyxel.KEY_RIGHT],
             keys_move_x_neg=[pyxel.KEY_A, pyxel.KEY_LEFT],
             keys_jump=[pyxel.KEY_W, pyxel.KEY_SPACE, pyxel.KEY_UP],
