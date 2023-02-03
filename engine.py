@@ -10,18 +10,25 @@ class Physics:
     def __init__(self):
         self.dy = 0
         self.is_grounded = False
+        self.is_falling = True
+
+    def ground(self):
+        self.dy = 0
+        self.is_grounded = True
+        self.is_falling = False
 
     def fall(self, is_colliding=False):
-        if not is_colliding:
+        if self.is_grounded and not self.is_falling:
+            self.ground()
+
+        if self.dy >= GRAVITY:
+            self.is_grounded = False
+
+        if not is_colliding or not self.is_grounded:
+            self.is_falling = True
             self.dy += GRAVITY
             if self.dy > TERMINAL_VELOCITY:
                 self.dy = TERMINAL_VELOCITY
-        else:
-            self.dy = 0
-            self.is_grounded = True
-
-        if self.dy > GRAVITY:
-            self.is_grounded = False
 
 
 class BoxWithCollision:
@@ -50,12 +57,19 @@ class BoxWithCollision:
         self.keys_jump = keys_jump
 
     def is_colliding_top(self, box):
-        if (box.y + box.h >= self.y and box.y <= self.y) and (
-            (self.x <= box.x + box.w and self.x + self.w >= box.x + box.w)
-            or (self.x <= box.x and self.x + self.w >= box.x)
+        if (
+            (box.y + box.h >= self.y and box.y <= self.y)
+            and box.phys
+            and (
+                (self.x <= box.x + box.w and self.x + self.w >= box.x + box.w)
+                or (self.x <= box.x and self.x + self.w >= box.x)
+            )
         ):
-            # knockback
-            box.y = self.y - box.h - GRAVITY
+            print("COLLIDE")
+            if box.phys.dy > 0:
+                # knockback
+                box.phys.ground()
+                box.y = self.y - box.h - GRAVITY
             return True
         return False
 
@@ -85,7 +99,6 @@ class BoxWithCollision:
             if pyxel.btnp(key) and self.phys and self.phys.is_grounded:
                 self.phys.is_grounded = False
                 self.phys.dy = -10
-                self.y += self.phys.dy
                 break
 
     def draw(self):
