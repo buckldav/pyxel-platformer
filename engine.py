@@ -5,6 +5,7 @@ from enum import Enum
 GRAVITY = 0.5
 TERMINAL_VELOCITY = 6
 PLAYER_SPEED = 6
+JUMP_STRENGTH = 10
 
 
 class PhysicsStates(Enum):
@@ -133,7 +134,7 @@ class Player(Box):
             # jump
             if pyxel.btnp(key) and self.phys and self.phys.is_grounded:
                 self.phys.is_grounded = False
-                self.phys.dy = -10
+                self.phys.dy = -JUMP_STRENGTH
                 break
 
         if self.state_machine.state == PhysicsStates.IDLE:
