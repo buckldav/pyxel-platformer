@@ -18,15 +18,15 @@ class PhysicsStates(Enum):
 
 class PhysicsStateMachine:
     def __init__(self):
-        self.state = PhysicsStates.FALLING
+        self.state = PhysicsStates.IDLE
 
 
 class Physics:
-    def __init__(self, state_machine: PhysicsStateMachine):
+    def __init__(self):
         self.dy = 0
         self.is_grounded = False
         self.is_falling = True
-        self.state_machine = state_machine
+        self.state_machine = PhysicsStateMachine()
 
     def ground(self):
         self.dy = 0
@@ -62,8 +62,7 @@ class Box:
         self.h = h
         self.col = col
         self.filled = filled
-        self.state_machine = PhysicsStateMachine() if phys else None
-        self.phys = Physics(self.state_machine) if phys else None
+        self.phys = Physics() if phys else None
 
     def is_colliding_top(self, box):
         if (
@@ -90,8 +89,8 @@ class Box:
             collider(self)
 
     def draw(self):
-        if self.state_machine:
-            print(self.state_machine.state)
+        if self.phys:
+            print(self.phys.state_machine.state)
         if self.filled:
             pyxel.rect(self.x, self.y, self.w, self.h, self.col)
         else:
@@ -137,8 +136,8 @@ class Player(Box):
                 self.phys.dy = -JUMP_STRENGTH
                 break
 
-        if self.state_machine.state == PhysicsStates.IDLE:
+        if self.phys.state_machine.state == PhysicsStates.IDLE:
             if self.x > x:
-                self.state_machine.state = PhysicsStates.RUNNING_RIGHT
+                self.phys.state_machine.state = PhysicsStates.RUNNING_RIGHT
             elif self.x < x:
-                self.state_machine.state = PhysicsStates.RUNNING_LEFT
+                self.phys.state_machine.state = PhysicsStates.RUNNING_LEFT
