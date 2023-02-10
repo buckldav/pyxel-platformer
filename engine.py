@@ -1,13 +1,11 @@
 import pyxel
 from typing import Optional, List, Callable
 from enum import Enum
-import math
 
 GRAVITY = 0.75
 TERMINAL_VELOCITY = 20
 PLAYER_SPEED = 6
-JUMP_STRENGTH = 12
-fall_more = True
+JUMP_STRENGTH = 11.5
 
 
 class PhysicsStates(Enum):
@@ -27,19 +25,17 @@ class Physics:
     def __init__(self):
         self.dy = 0
         self.is_grounded = False
-        self.is_falling = True
+        self.fall_more = True
         self.state_machine = PhysicsStateMachine()
 
     def ground(self):
         self.dy = 0
         self.is_grounded = True
-        self.is_falling = False
 
     def fall(self, is_colliding=False):
-        global fall_more
-        if self.is_grounded and not self.is_falling:
+        if self.is_grounded:
             self.dy = 0
-            fall_more = False
+            self.fall_more = False
 
         if self.dy >= GRAVITY:
             self.is_grounded = False
@@ -50,7 +46,7 @@ class Physics:
             self.state_machine.state = PhysicsStates.IDLE
 
         if not is_colliding or not self.is_grounded:
-            self.is_falling = True
+            self.is_grounded = False
             self.dy += GRAVITY
 
             if self.dy > TERMINAL_VELOCITY:
@@ -87,24 +83,19 @@ class Box:
         return False
 
     def fall(self, collider: Callable[[any], bool]):
-        global fall_more
         if self.phys:
-            # call the collider to see if the object can fall
-
-            # print("fall_more", fall_more)
-            if fall_more:
+            if self.phys.fall_more:
+                # call the collider to see if the object can fall
                 self.phys.fall(collider(self))
                 self.y += self.phys.dy
-                # print("y", self.y)
-                fall_more = False
+                self.phys.fall_more = False
             # call the collider a second time for knockback
             collider(self)
 
     def draw(self):
-        # if self.phys:
-        #     print(self.phys.state_machine.state)
-        global fall_more
-        fall_more = True
+        if self.phys:
+            #    print(self.phys.state_machine.state)
+            self.phys.fall_more = True
         if self.filled:
             pyxel.rect(self.x, self.y, self.w, self.h, self.col)
         else:
