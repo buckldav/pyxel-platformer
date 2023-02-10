@@ -12,6 +12,8 @@ class App:
         self.floors = [
             Box(0, pyxel.height - 20, pyxel.width, 20, FLOOR_COLOR, filled=True),
             Box(50, pyxel.height - 100, 40, 20, FLOOR_COLOR, filled=True),
+            Box(200, pyxel.height - 100, 40, 20, FLOOR_COLOR, filled=True),
+            Box(300, pyxel.height - 100, 40, 20, FLOOR_COLOR, filled=True),
         ]
         self.player = Player(
             20,

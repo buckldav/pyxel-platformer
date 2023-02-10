@@ -1,11 +1,13 @@
 import pyxel
 from typing import Optional, List, Callable
 from enum import Enum
+import math
 
-GRAVITY = 0.5
-TERMINAL_VELOCITY = 6
+GRAVITY = 0.75
+TERMINAL_VELOCITY = 20
 PLAYER_SPEED = 6
-JUMP_STRENGTH = 10
+JUMP_STRENGTH = 12
+fall_more = True
 
 
 class PhysicsStates(Enum):
@@ -34,8 +36,10 @@ class Physics:
         self.is_falling = False
 
     def fall(self, is_colliding=False):
+        global fall_more
         if self.is_grounded and not self.is_falling:
-            self.ground()
+            self.dy = 0
+            fall_more = False
 
         if self.dy >= GRAVITY:
             self.is_grounded = False
@@ -48,6 +52,7 @@ class Physics:
         if not is_colliding or not self.is_grounded:
             self.is_falling = True
             self.dy += GRAVITY
+
             if self.dy > TERMINAL_VELOCITY:
                 self.dy = TERMINAL_VELOCITY
 
@@ -76,21 +81,30 @@ class Box:
             if box.phys.dy > 0:
                 # knockback
                 box.phys.ground()
-                box.y = self.y - box.h - GRAVITY
+                box.y = self.y - box.h
+                box.phys.dy = 0
             return True
         return False
 
     def fall(self, collider: Callable[[any], bool]):
+        global fall_more
         if self.phys:
             # call the collider to see if the object can fall
-            self.phys.fall(collider(self))
-            self.y += self.phys.dy
+
+            # print("fall_more", fall_more)
+            if fall_more:
+                self.phys.fall(collider(self))
+                self.y += self.phys.dy
+                # print("y", self.y)
+                fall_more = False
             # call the collider a second time for knockback
             collider(self)
 
     def draw(self):
-        if self.phys:
-            print(self.phys.state_machine.state)
+        # if self.phys:
+        #     print(self.phys.state_machine.state)
+        global fall_more
+        fall_more = True
         if self.filled:
             pyxel.rect(self.x, self.y, self.w, self.h, self.col)
         else:
